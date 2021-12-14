@@ -19,7 +19,6 @@ canvas.height = (CELL_SIZE + 1) * height + 1;
 canvas.width = (CELL_SIZE + 1) * width + 1;
 
 canvas.addEventListener('click', (event) => {
-  console.log('from here');
   const boundingRect = canvas.getBoundingClientRect();
 
   const scaleX = canvas.width / boundingRect.width;
@@ -40,15 +39,23 @@ canvas.addEventListener('click', (event) => {
 const ctx = canvas.getContext('2d');
 
 let animationId = null;
-
+let canRender = true;
+let tickTime = 200; // ms
 // This function is the same as before, except the
 // result of `requestAnimationFrame` is assigned to
 // `animationId`.
 const renderLoop = () => {
-  drawGrid();
-  drawCells();
+  if (canRender) {
+    drawGrid();
+    drawCells();
 
-  universe.tick();
+    universe.tick();
+
+    canRender = false;
+    setTimeout(() => {
+      canRender = true;
+    }, tickTime);
+  }
 
   animationId = requestAnimationFrame(renderLoop);
 };
@@ -64,6 +71,8 @@ const pause = () => {
   playPauseButton.textContent = '▶';
   cancelAnimationFrame(animationId);
   animationId = null;
+  drawGrid();
+  drawCells();
 };
 
 playPauseButton.addEventListener('click', (event) => {
