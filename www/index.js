@@ -20,14 +20,40 @@ canvas.width = (CELL_SIZE + 1) * width + 1;
 
 const ctx = canvas.getContext('2d');
 
-const renderLoop = () => {
-  universe.tick();
+let animationId = null;
 
+// This function is the same as before, except the
+// result of `requestAnimationFrame` is assigned to
+// `animationId`.
+const renderLoop = () => {
   drawGrid();
   drawCells();
 
-  requestAnimationFrame(renderLoop);
+  universe.tick();
+
+  animationId = requestAnimationFrame(renderLoop);
 };
+
+const playPauseButton = document.getElementById('play-pause');
+
+const play = () => {
+  playPauseButton.textContent = '⏸';
+  renderLoop();
+};
+
+const pause = () => {
+  playPauseButton.textContent = '▶';
+  cancelAnimationFrame(animationId);
+  animationId = null;
+};
+
+playPauseButton.addEventListener('click', (event) => {
+  if (isPaused()) {
+    play();
+  } else {
+    pause();
+  }
+});
 
 const drawGrid = () => {
   ctx.beginPath();
@@ -50,6 +76,10 @@ const drawGrid = () => {
 
 const getIndex = (row, column) => {
   return row * width + column;
+};
+
+const isPaused = () => {
+  return animationId === null;
 };
 
 const drawCells = () => {
@@ -77,9 +107,7 @@ const drawCells = () => {
 };
 
 const init = () => {
-  drawGrid();
-  drawCells();
-  requestAnimationFrame(renderLoop);
+  play();
 };
 
 init();
